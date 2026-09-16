@@ -300,507 +300,332 @@
 </style>
 
 <div class="wrap">
-
   <header class="masthead">
-    <p class="eyebrow">부산대학교 도서관 · 서비스 설계</p>
+    <p class="eyebrow">부산대학교 도서관 · 현재 상태</p>
     <h1>별자리 서재</h1>
     <p class="standfirst">
-      각자의 서재를 별자리로 그리고, 그 별자리들이 겹치는 곳에서 학교 전체의 밤하늘이 떠오르는 서비스.
-      개인의 서재는 끝까지 비공개이고, 공개되는 것은 오직 겹침뿐이다.
+      도서관 &lsquo;내 서재&rsquo;에 담긴 87,014건을 집계해, 자료를 별로 그리고 같은 사람이 함께 담은
+      관계를 선으로 이은 지도. 위치는 주제 분류가 아니라 <em>누가 담았는가</em>로 정해진다.
     </p>
     <div class="meta">
-      <span>설계 v0.2 · <b>2026-09-16</b></span>
-      <span>1단계 범위 · <b>소장자료 (Pyxis)</b></span>
-      <span>저장 · <b>Postgres + RLS</b></span>
+      <span>스냅샷 · <b>2026-09-16</b></span>
+      <span>이용자 · <b>11,613명</b></span>
+      <span>별 <b>11,299</b> · 선 <b>24,101</b> · 성단 <b>161</b></span>
     </div>
   </header>
 
   <!-- ══ 1 ══ -->
   <section>
-    <p class="kicker">무엇을 만드는가</p>
-    <h2>화면은 셋, 그중 하나는 레이어다</h2>
+    <p class="kicker">무엇이 있나</p>
+    <h2>화면 하나. 배율에 따라 다른 것을 보여준다</h2>
     <p class="lede">
-      개인 캔버스와 전역 우주는 좌표계를 공유하지 않는다. 남이 자료를 등록해도 내 별자리가 흐트러지지 않고,
-      내가 무엇을 등록해도 우주의 모양이 흔들리지 않는다.
+      설계는 화면 셋(내 서재 · 전체 유니버스 · 내 위치)이었지만, 실제로 세운 것은
+      <strong>전체 유니버스 하나</strong>다. 개인 계층을 만들기 전에 설계의 전제를 검증할 수
+      있었기 때문이다 &mdash; 도서관에 이미 &lsquo;내 서재&rsquo; 데이터가 있었다.
     </p>
 
     <div class="screens">
       <div class="screen">
-        <span class="n">CANVAS</span>
-        <h4>내 서재</h4>
-        <p>검색 결과를 끌어다 놓아 별을 만들고, 별과 별을 잇는다. 좌표는 내가 놓은 그대로 영구히 고정된다.</p>
-        <span class="who">본인만</span>
+        <span class="n">OVERVIEW</span>
+        <h4>성단</h4>
+        <p>개별 별 대신 성단 161개를 덩어리와 이름으로 보여준다. 덩어리를 누르면 그 성단으로 확대된다.</p>
+        <span class="who">전체 보기 배율</span>
       </div>
       <div class="screen">
-        <span class="n">UNIVERSE</span>
-        <h4>전체 유니버스</h4>
-        <p>모두의 별자리가 겹쳐 만들어진 밤하늘. 여러 사람이 같은 연결을 그을수록 그 선이 굵어진다.</p>
-        <span class="who">누구나</span>
+        <span class="n">ZOOM</span>
+        <h4>별</h4>
+        <p>확대하면 덩어리가 풀려 개별 별이 된다. 밝은 별 → 모든 별 → 전체 연결선 순으로 드러난다.</p>
+        <span class="who">1.35배 이상</span>
       </div>
       <div class="screen">
-        <span class="n">OVERLAY</span>
-        <h4>내 위치</h4>
-        <p>로그인하면 회색 우주에서 내 별들만 색이 차오르고, 카메라가 내 별자리의 무게중심으로 날아간다.</p>
-        <span class="who">본인에게만</span>
+        <span class="n">FOCUS</span>
+        <h4>선택</h4>
+        <p>별을 누르면 그 별의 모든 연결만 남고 나머지가 어두워진다. 이어진 별 목록을 타고 이동할 수 있다.</p>
+        <span class="who">클릭 · 검색</span>
       </div>
     </div>
 
     <p>
-      세 번째가 구현이 가장 쉽다. 좌표를 새로 계산하는 게 아니라 <em>내 work_id 집합</em> 하나로
-      색만 바꾸는 레이어이기 때문이다. 쿼리 한 줄, 렌더 패스 하나면 된다.
+      책·저자·성단 이름으로 <strong>검색</strong>할 수 있다. 11,299개가 이미 메모리에 있으니 서버 호출이
+      없고, 한글 표기가 들쭉날쭉해서 공백·기호를 지우고 맞춘다. 고르면 그 별로 날아가 선택된다.
     </p>
   </section>
 
   <!-- ══ 2 ══ -->
   <section>
-    <p class="kicker">데이터 모델</p>
-    <h2>별은 판본이 아니라 저작이다</h2>
-    <p>
-      『1984』의 민음사 양장본과 문고본, Penguin 원서는 ISBN이 전부 다르다. ISBN 단위로 별을 만들면
-      같은 책을 읽은 세 사람이 서로 다른 별 셋으로 흩어진다. 겹침을 보겠다는 목표가 정면으로 깨진다.
-    </p>
-    <p>
-      소장 목록 안에서도 같은 일이 일어난다. 그리고 나중에 학술논문을 붙이면 arXiv 프리프린트와
-      학회 게재본에서 똑같은 문제가 반복된다. 그래서 <strong>저작(Work)</strong>과
-      <strong>판본(Edition)</strong>을 나눈다. 사용자는 검색에서 판본을 집지만,
-      하늘에 뜨는 별은 저작이다.
-    </p>
+    <p class="kicker">파이프라인</p>
+    <h2>DB는 아직 없다. 스냅샷이다</h2>
 
-    <pre><code><span class="c-star">Work</span>  "인공지능 : 수학적 이해에서 알고리즘까지"  오상훈   <span class="c-dim">← 하늘에 뜨는 단위</span>
- └ <span class="c-key">Edition</span>  홍릉 2025 <span class="c-star">"개정판"</span>  isbn13 <span class="c-dim">9791156002635</span>  pyxis <span class="c-dim">100838844</span>
-             ↑ <span class="c-dim">Pyxis 가 edition 필드로 "개정판"을 준다.
-               초판이 목록에 있다면 그건 별개 레코드다 — 합칠 자리가 여기다.</span></code></pre>
+    <figure class="figure">
+      <div class="figure-scroll">
+        <svg viewBox="0 0 700 250" role="img" aria-label="도서관 Oracle에서 집계 스크립트를 거쳐 정적 JSON으로, 브라우저가 그것을 읽는 구조도">
+          <defs>
+            <marker id="ar2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--muted)"/>
+            </marker>
+          </defs>
 
-    <p>
-      1단계에서는 레코드 하나가 Work 하나 + Edition 하나가 된다. 구조를 지금 만들어두는 이유는
-      <strong>나중에 넣을 수 없기 때문</strong>이다. 판본을 실제로 묶는 건 2단계, 원서와 번역본이
-      같은 별에 모이는 건 그다음이다.
-    </p>
+          <rect x="18" y="20" width="200" height="66" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>
+          <text x="38" y="46" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="500" fill="var(--ink)">도서관 Oracle</text>
+          <text x="38" y="68" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" fill="var(--muted)">PATRON_COLLECTION</text>
+          <text x="198" y="68" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--ok)">읽기 전용</text>
 
-    <h3>중복 판정은 제약조건이 대신한다</h3>
-    <p>
-      식별자 테이블의 기본키를 <code>(scheme, value_norm)</code>으로 잡으면
-      &ldquo;하나의 식별자는 하나의 별에만&rdquo;이 애플리케이션 로직이 아니라 DB 불변식이 된다.
-      판정 코드에 버그가 있어도 데이터는 갈라지지 않는다.
-    </p>
+          <path d="M 218 53 L 258 53" fill="none" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#ar2)"/>
 
-    <h3>자료유형 11종 중 하나만 뺀다</h3>
-    <p>
-      Pyxis가 <code>/material-types</code>로 전 11종을 내려준다. 검색 패널의 필터는
-      <strong>하드코딩하지 말고 이 엔드포인트로 채운다.</strong>
-    </p>
+          <rect x="262" y="20" width="200" height="66" fill="var(--surface)" stroke="var(--line)"/>
+          <rect x="262" y="20" width="200" height="3" fill="var(--accent)"/>
+          <text x="282" y="48" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="var(--ink)">build_universe.py</text>
+          <text x="282" y="70" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" fill="var(--muted)">집계 · 임베딩 · 성단 검출</text>
 
-    <div class="t-scroll">
-      <table>
-        <caption>Pyxis materialType → work_type · 실측 11종</caption>
-        <thead><tr><th>code</th><th>자료유형</th><th>work_type</th><th>1단계</th></tr></thead>
-        <tbody>
-          <tr><td class="mono-cell">BK · RB</td><td>단행본 · 고서</td><td class="mono-cell">book</td><td>포함</td></tr>
-          <tr><td class="mono-cell">TH · AT · RP</td><td>학위논문 · 기사 · 보고서</td><td class="mono-cell">paper</td><td>포함</td></tr>
-          <tr><td class="mono-cell">MP · ML · VM · MX</td><td>지도 · 음악 · 시청각 · 복합</td><td class="mono-cell">media</td><td>포함</td></tr>
-          <tr><td class="mono-cell">ER</td><td>전자자료</td><td class="mono-cell">내용에 따라</td><td>포함</td></tr>
-          <tr><td class="mono-cell">CR</td><td>연속간행물</td><td>&mdash;</td><td><strong>제외</strong></td></tr>
-        </tbody>
-      </table>
-    </div>
+          <path d="M 462 53 L 502 53" fill="none" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#ar2)"/>
+
+          <rect x="506" y="20" width="176" height="66" fill="var(--surface)" stroke="var(--line)"/>
+          <text x="526" y="48" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="var(--ink)">universe.json</text>
+          <text x="526" y="70" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" fill="var(--muted)">정적 파일 3.8MB</text>
+
+          <path d="M 594 86 L 594 124" fill="none" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#ar2)"/>
+
+          <rect x="262" y="130" width="420" height="66" fill="var(--paper)" stroke="var(--line)"/>
+          <text x="282" y="158" font-family="Noto Serif KR, serif" font-size="14" font-weight="600" fill="var(--ink)">브라우저 — Canvas 2D</text>
+          <text x="282" y="180" font-family="IBM Plex Sans KR, sans-serif" font-size="11.5" fill="var(--muted)">LOD · 검색 · 선택 강조 — 런타임에 AI도 서버도 없다</text>
+
+          <text x="18" y="160" font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--alert)">이용자 식별자는</text>
+          <text x="18" y="178" font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--alert)">SQL 안에서 끝난다</text>
+        </svg>
+      </div>
+      <figcaption>
+        스크립트를 돌릴 때만 DB에 붙는다. 갱신은 수동이다 &mdash; 지금 화면은 살아 움직이는 게 아니라 한 시점의 스냅샷이다.
+      </figcaption>
+    </figure>
 
     <p>
-      <code>CR</code>만 뺀다. 저널은 저작이 아니라 컨테이너다 &mdash; 논문 한 편과 저널 한 종이
-      같은 층위로 하늘에 뜨면 별자리의 의미가 깨진다.
-    </p>
-
-    <h3>식별자에 권위 등급을 붙인다</h3>
-    <p>
-      소장자료만 다루면 DOI가 거의 없다. 그런데 <strong>학위논문·보고서·고서·오래된 자료는
-      ISBN도 없다.</strong> 이들을 &lsquo;식별자 없는 자료&rsquo;로 취급하면 아래 k-임계값에 걸려
-      영원히 우주에 뜨지 못한다.
-    </p>
-    <p>
-      소장 목록에 오른 자료는 <em>사서가 목록을 만든 자료</em>다. 실재가 이미 보증되어 있다.
-      그래서 Pyxis 레코드 ID를 <code>authority='local'</code> 식별자로 인정한다.
-      지킬 선은 두 개다 &mdash; <code>global</code>(ISBN·DOI)과 스키마 수준에서 구분하고,
-      나중에 ISBN이 발견되면 <code>global</code> 행을 추가해 그쪽을 우선한다.
-      다기관으로 넓힐 때 재정합이 필요한 것은 <code>local</code> 행뿐이다.
-    </p>
-
-    <h3>1단계에서는 유사도 매칭을 끈다</h3>
-    <p>
-      단일 도서관 목록이라 한 자료 = 한 레코드다. <strong>Pyxis 레코드 1개 = Work 1개 + Edition 1개.</strong>
-      자동 병합 없음. 같은 자료를 두 사람이 등록하면 식별자가 충돌하면서 자동으로 같은 별에 모인다 &mdash;
-      겹침은 그게 전부고, 애매한 판정이 없다.
-    </p>
-    <p>
-      유사도를 스키마에 남겨두는 건 역할이 바뀌기 때문이다. <em>중복 제거</em>에서
-      <em>판본 묶기</em>로 &mdash; 『인공지능』 2018년판과 2025 개정판은 Pyxis에 별개 레코드로
-      존재하고, 이들을 한 별로 모으는 일이 남는다. 틀려도 두 별이 하나로 합쳐질 뿐이고
-      되돌릴 수 있지만, 1단계부터 자동으로 켜면 오병합 리스크만 지고 얻는 게 적다.
-      인스펙터에 <strong>&ldquo;이 책은 저 별과 같은 책이에요&rdquo;</strong> 버튼만 두어 제안을 모아둔다.
+      설계한 스키마(<code>docs/schema.sql</code>)는 아직 어디에도 만들지 않았다. 개인 서재를 서버에
+      저장하고 여러 사람의 등록이 실제로 겹쳐서 우주가 살아 움직이게 하려면 이 단계가 필요하다.
     </p>
   </section>
 
   <!-- ══ 3 ══ -->
   <section>
-    <p class="kicker">프라이버시 경계</p>
-    <h2>저장은 신원째로, 표시는 집계만</h2>
+    <p class="kicker">좌표</p>
+    <h2>위치는 &lsquo;누가 담았는가&rsquo;로 정한다</h2>
     <p>
-      익명으로 <em>수집</em>하는 게 아니다. 누가 무엇을 등록했는지는 DB에 그대로 남는다 &mdash;
-      그래야 &ldquo;우주에서 내 위치&rdquo;를 계산할 수 있고, 탈퇴할 때 그 사람 몫만 정확히 뺄 수 있다.
-      가리는 일은 <strong>표시 시점</strong>에 일어난다.
-    </p>
-
-    <div class="note warn">
-      <span class="tag">설계의 급소</span>
-      <p>
-        가리는 작업을 클라이언트나 서버 코드에서 하면 안 된다. 클라이언트에서 가리면 API 응답에
-        <code>user_id</code>가 그대로 실려 오고, 서버 코드에서 가리면 언젠가 엔드포인트를 하나 추가하면서 빠뜨린다.
-      </p>
-      <p>
-        <strong>DB 경계에 박아두면 신원 컬럼이 공개 질의 결과에 애초에 존재할 수 없다.</strong>
-      </p>
-    </div>
-
-    <figure class="figure">
-      <div class="figure-scroll">
-        <svg viewBox="0 0 700 372" role="img" aria-label="원본 테이블에서 공개 출구와 개인 출구가 갈라지는 구조도">
-          <defs>
-            <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--muted)"/>
-            </marker>
-          </defs>
-
-          <!-- 원본 -->
-          <rect x="70" y="8" width="560" height="74" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>
-          <text x="90" y="34" font-family="IBM Plex Mono, monospace" font-size="14" font-weight="500" fill="var(--ink)">nodes · edges · constellations</text>
-          <text x="90" y="56" font-family="IBM Plex Sans KR, sans-serif" font-size="12.5" fill="var(--muted)">신원 포함 · 좌표 · 메모 · 태그</text>
-          <text x="610" y="56" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="var(--alert)">RLS ON</text>
-
-          <!-- 분기선 -->
-          <path d="M 350 82 L 350 100 L 185 100 L 185 122" fill="none" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#ar)"/>
-          <path d="M 350 82 L 350 100 L 515 100 L 515 122" fill="none" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#ar)"/>
-
-          <!-- 공개 문 -->
-          <rect x="24" y="128" width="322" height="112" fill="var(--surface)" stroke="var(--line)" stroke-width="1"/>
-          <rect x="24" y="128" width="322" height="3" fill="var(--accent)"/>
-          <text x="44" y="156" font-family="IBM Plex Mono, monospace" font-size="11" letter-spacing="1.4" fill="var(--accent)">공개 출구</text>
-          <text x="44" y="182" font-family="IBM Plex Mono, monospace" font-size="13.5" fill="var(--ink)">universe_works</text>
-          <text x="44" y="202" font-family="IBM Plex Mono, monospace" font-size="13.5" fill="var(--ink)">universe_edges</text>
-          <text x="44" y="226" font-family="IBM Plex Sans KR, sans-serif" font-size="12" fill="var(--muted)">security_invoker OFF · user_id 컬럼 없음</text>
-
-          <!-- 개인 문 -->
-          <rect x="354" y="128" width="322" height="112" fill="var(--surface)" stroke="var(--line)" stroke-width="1"/>
-          <rect x="354" y="128" width="322" height="3" fill="var(--star)"/>
-          <text x="374" y="156" font-family="IBM Plex Mono, monospace" font-size="11" letter-spacing="1.4" fill="var(--star)">개인 출구</text>
-          <text x="374" y="182" font-family="IBM Plex Mono, monospace" font-size="13.5" fill="var(--ink)">my_overlay_works</text>
-          <text x="374" y="202" font-family="IBM Plex Mono, monospace" font-size="13.5" fill="var(--ink)">my_overlay_edges</text>
-          <text x="374" y="226" font-family="IBM Plex Sans KR, sans-serif" font-size="12" fill="var(--muted)">security_invoker ON · RLS가 내 행만 통과</text>
-
-          <path d="M 185 240 L 185 272" fill="none" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#ar)"/>
-          <path d="M 515 240 L 515 272" fill="none" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#ar)"/>
-
-          <!-- 소비처 -->
-          <rect x="24" y="278" width="322" height="66" fill="var(--paper)" stroke="var(--line)" stroke-width="1"/>
-          <text x="44" y="306" font-family="Noto Serif KR, serif" font-size="15" font-weight="600" fill="var(--ink)">전체 유니버스</text>
-          <text x="44" y="328" font-family="IBM Plex Sans KR, sans-serif" font-size="12" fill="var(--muted)">로그인 없이 누구나</text>
-
-          <rect x="354" y="278" width="322" height="66" fill="var(--paper)" stroke="var(--line)" stroke-width="1"/>
-          <text x="374" y="306" font-family="Noto Serif KR, serif" font-size="15" font-weight="600" fill="var(--ink)">내 위치 레이어</text>
-          <text x="374" y="328" font-family="IBM Plex Sans KR, sans-serif" font-size="12" fill="var(--muted)">로그인한 본인에게만</text>
-        </svg>
-      </div>
-      <figcaption>
-        공개 뷰와 개인 뷰의 security_invoker 설정이 정확히 반대다.<br>
-        공개는 소유자 권한으로 RLS를 넘어 집계하고, 개인은 호출자 권한이라 RLS가 내 행만 통과시킨다.
-      </figcaption>
-    </figure>
-
-    <h3>가려도 추론된다 &mdash; k-임계값</h3>
-    <p>
-      <code>user_id</code>를 완벽히 가려도 집계 자체에서 역추론이 된다.
-      희귀한 논문 두 편을 잇는 선이 1인짜리로 떠 있으면 그 분야 사람들은 누군지 안다.
-      <strong>연결은 &ldquo;읽었다&rdquo;보다 훨씬 사적인 정보다 &mdash; 그 사람의 생각이기 때문에.</strong>
-    </p>
-
-    <div class="t-scroll">
-      <table>
-        <caption>전역 우주 노출 규칙</caption>
-        <thead>
-          <tr><th>요소</th><th>남에게 보이는 조건</th><th>나에게</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>별 &mdash; 소장자료 <span class="c-dim">(식별자 있음)</span></td><td class="num">등록자 1명부터</td><td>항상</td></tr>
-          <tr><td>별 &mdash; 식별자 없는 자료 <span class="c-dim">(향후 웹문서)</span></td><td class="num">등록자 2명부터</td><td>항상</td></tr>
-          <tr><td><strong>연결선</strong></td><td class="num">서로 다른 3명부터</td><td>항상 (나에게만)</td></tr>
-          <tr><td>등록자 수 숫자</td><td class="num">3명 이상일 때만 노출</td><td>동일</td></tr>
-          <tr><td>누가 등록했는지</td><td>어떤 경로로도 불가</td><td>&mdash;</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p>
-      밝기도 원시값으로 내보내지 않는다. 1&ndash;5 등급으로 구간화해서 <strong>1명과 2명이 같은 계급</strong>이
-      되게 한다. 항성 등급이 원래 로그 스케일이라 별자리 은유와도 맞는다.
+      자료&times;이용자 행렬(11,299 &times; 3,467)을 스펙트럴 임베딩해서, <strong>같은 사람들이 담은 자료끼리
+      가까이</strong> 놓는다. 주제 분류(청구기호)는 쓰지 않는다.
     </p>
     <p>
-      1단계에서는 모든 소장자료가 식별자를 갖기 때문에 두 번째 행(2명부터)이 사실상 잠든다.
-      그 분기는 웹문서를 넣는 시점에 되살아난다 &mdash; 조건을 지금 심어두고 나중에 깨우는 편이,
-      나중에 급히 끼워넣는 것보다 안전하다.
+      그런데 배치에 쓰지 않은 DDC로 대조해보니 <em>주제 구역이 저절로 생겼다</em> &mdash; 구역마다 특정
+      분야가 1.3&ndash;2.8배 몰린다. 우상단에 생화학·재료과학과공학·Kinesiology, 우하단에 데이터·TRIZ·클린 코드,
+      하단에 회귀분석·최신정신의학·맨큐의 경제학이 놓인다. 분류를 한 번도 보지 않고 나온 결과다.
     </p>
 
-    <div class="note">
-      <span class="tag">제약이 만든 기능</span>
-      <p>
-        임계값에 못 미친 내 별은 우주에 없지만, 로그인한 나에게만 희미하게 그려준다.
-        좌표는 내가 그 별과 이어둔 다른 별들의 무게중심 근처에 띄우고
-        <strong>&ldquo;아직 당신만 보고 있는 별&rdquo;</strong> 배지를 단다.
-        두 번째 사람이 등록하는 순간 별이 점화되어 우주에 등재된다 &mdash; 이 서비스에서 가장 기분 좋은 순간이 된다.
-      </p>
-    </div>
+    <h3>화면 좌표와 원본 좌표를 분리했다</h3>
+    <p>
+      담은 사람이 많은 자료는 실제로 중심에 몰린다(아래 표). 사실이지만 빽빽해서 읽히지 않는다.
+      그래서 <strong>각도와 중심&ndash;주변 순서를 보존한 채 중심부에만 면적을 더 주는 변환</strong>을 화면 좌표로
+      따로 둔다. 데이터를 바꾸지 않고 옮겨 그리는 방식만 바꾼다.
+    </p>
+    <pre><code><span class="c-star">x, y</span>    원본 좌표      ← 인기 자료는 여전히 중심에 있다
+<span class="c-key">dx, dy</span>  화면 좌표      ← 등면적 재배치 (강도 0.7). 토글로 전환 가능</code></pre>
   </section>
 
   <!-- ══ 4 ══ -->
   <section>
-    <p class="kicker">실측 · 2026-09-16</p>
-    <h2>통합검색은 네 시스템의 합성이었다</h2>
-    <p class="lede">
-      <code>lib.pusan.ac.kr</code> 통합검색의 실제 네트워크 트래픽을 관측한 결과,
-      한 검색창 뒤에 서로 다른 네 개의 시스템이 붙어 있었다.
-      <strong>1단계는 이 중 소장자료 하나만 쓴다.</strong>
-    </p>
+    <p class="kicker">데이터가 말한 것</p>
+    <h2>겹침은 실제로 생긴다. 다만 인기도가 지배한다</h2>
 
     <div class="t-scroll">
       <table>
-        <caption>&lsquo;인공지능&rsquo; 검색 · 실측</caption>
-        <thead>
-          <tr><th>탭</th><th class="num">건수</th><th>시스템</th><th>1단계</th></tr>
-        </thead>
+        <caption>등급(담은 사람 수)별 분포와 중심 거리</caption>
+        <thead><tr><th>등급</th><th class="num">자료 수</th><th class="num">중심 거리(중앙값)</th></tr></thead>
         <tbody>
-          <tr>
-            <td>소장자료</td><td class="num">3,373</td>
-            <td><strong>Pyxis</strong> <span class="c-dim">자체 ILS · 우리 도메인</span></td>
-            <td><strong>포함</strong></td>
-          </tr>
-          <tr>
-            <td>학술논문</td><td class="num">72,327</td>
-            <td>EBSCO EDS</td>
-            <td class="c-dim">5단계</td>
-          </tr>
-          <tr>
-            <td>전자저널</td><td class="num">9</td>
-            <td rowspan="2">EBSCO Publication Finder</td>
-            <td rowspan="2" class="c-dim">5단계</td>
-          </tr>
-          <tr><td>전자책</td><td class="num">418</td></tr>
+          <tr><td>2명</td><td class="num">7,447</td><td class="num">174</td></tr>
+          <tr><td>3&ndash;5명</td><td class="num">3,183</td><td class="num">152</td></tr>
+          <tr><td>6&ndash;15명</td><td class="num">577</td><td class="num">111</td></tr>
+          <tr><td>16&ndash;50명</td><td class="num">91</td><td class="num">84</td></tr>
+          <tr><td>51명+</td><td class="num">1</td><td class="num">89</td></tr>
         </tbody>
       </table>
     </div>
 
     <p>
-      소장자료만 쓰면 <strong>막힌 곳이 하나도 없다.</strong> Pyxis는 우리 도메인이고 외부
-      자격증명 대기가 없다. 그리고 벤더 메타데이터 라이선스 제약도 없다 &mdash; 소장 목록은
-      우리 데이터이므로 <em>MARC 520 초록까지 저장할 수 있다.</em>
-      EBSCO를 붙이는 순간 생기는 &ldquo;초록은 저장하지 말 것&rdquo; 제약이 1단계에는 아예 없다.
+      <strong>담은 사람이 많을수록 중심에 가깝다</strong> &mdash; 단조롭게. 중심의 별들은 『물고기는 존재하지 않는다』(68명),
+      『인간 실격』(46), 『모순』(44), 『사피엔스』(43), 『채식주의자』(34)다. 가운데 뭉침은 렌더링 인공물이
+      아니라 사실이고, 이 데이터에서 가장 단단한 신호다.
     </p>
 
-    <h3>관측된 엔드포인트 &mdash; 전부 우리 도메인</h3>
-    <pre><code>GET /pyxis-api/1/collections/1/search?all=<span class="c-key">k|a|인공지능</span>&amp;max=20&amp;offset=0
-GET /pyxis-api/1/biblios/{id}                      <span class="c-dim">← MARC 원본 전체</span>
-GET /pyxis-api/1/material-types                    <span class="c-dim">← 자료유형 11종</span>
-GET /pyxis-api/collections/1/auto-completions/{q}  <span class="c-dim">← 검색 패널에 그대로</span>
-GET /pyxis-api/1/outer-biblio-images-by-isbn/{isbn13}</code></pre>
-
+    <h3>거대 성분은 교양·문학이고, 전공서는 흩어진다</h3>
     <p>
-      관측 시점에 <strong>인증 없이 응답했다.</strong> 그래도 서비스에서는 서버 프록시를 경유한다 &mdash;
-      레이트리밋과 캐시를 우리가 걸고, 나중에 EDS를 붙일 때 클라이언트 코드를 건드리지 않게 된다.
+      선으로 이어진 별 3,771개 중 가장 큰 덩어리가 1,020개다. 그 안의 48.3%가 문학(전체 평균 19.8%)이고,
+      10개 대분류에 모두 걸쳐 있다. 주제로 뭉친 게 아니라 <em>읽는 재미로 읽는 책</em>이 서로 겹치며 사슬로
+      이어진 것이다.
     </p>
+    <p>
+      반대로 공학·의학(600번대)은 전체 17.8%인데 거대 성분에서는 6.8%뿐이다. 전공서는 소수가 보니까
+      두세 권짜리 작은 별자리로 바깥에 남는다 &mdash; <code>표상과 실재 ↔ 심리철학과 인지과학</code>,
+      <code>재미있는 통계이야기 ↔ 통계학</code> 처럼.
+    </p>
+
+    <div class="note">
+      <span class="tag">제품적으로 값진 쪽</span>
+      <p>
+        교양 베스트셀러가 겹치는 건 어디서나 알 수 있다. <strong>&ldquo;이 학교에서 이 두 권을 같이 보는 사람들이
+        있다&rdquo;</strong>는 건 여기서만 나온다. 바깥의 작은 별자리들이 그것이다.
+      </p>
+    </div>
   </section>
 
   <!-- ══ 5 ══ -->
   <section>
-    <p class="kicker">어댑터</p>
-    <h2>검색은 도서관에서, 정체성은 식별자로</h2>
-    <p>
-      Pyxis 레코드 ID(<code>100838844</code>)를 별의 정체성으로 쓰면 안 된다.
-      다른 학교로 넓히는 순간 같은 논문이 학교마다 다른 별이 되고, 도서관이 시스템을 교체하면
-      누적된 별자리가 통째로 고아가 된다. 로컬 ID는 <code>access_links</code>에만 넣는다 &mdash;
-      <strong>이 테이블을 통째로 지워도 별자리는 멀쩡하다.</strong>
-    </p>
-
-    <div class="t-scroll">
-      <table>
-        <caption>Pyxis 응답 → 스키마 매핑</caption>
-        <thead><tr><th>Pyxis 필드</th><th>우리 필드</th><th>비고</th></tr></thead>
-        <tbody>
-          <tr><td class="mono-cell">isbn</td><td class="mono-cell">work_identifiers(isbn13)</td><td>ISBN-13 하이픈 없이 그대로 온다</td></tr>
-          <tr><td class="mono-cell">titleStatement</td><td class="mono-cell">works.title</td><td><strong>정규화 필수.</strong> <code>(괄호 접두)</code>·<code> : 부제</code>·<code> / 책임표시</code>가 섞인 KORMARC 원문</td></tr>
-          <tr><td class="mono-cell">author</td><td class="mono-cell">works.authors</td><td>제1저자뿐 &mdash; 전체 저자는 <code>/biblios/{id}</code>의 100·700에서</td></tr>
-          <tr><td class="mono-cell">edition</td><td class="mono-cell">editions.label</td><td>&ldquo;개정판&rdquo; 등</td></tr>
-          <tr><td class="mono-cell">id</td><td class="mono-cell">access_links.local_record_id</td><td>정체성 아님</td></tr>
-          <tr><td class="mono-cell">branchVolumes[]</td><td class="mono-cell">access_links.holding</td><td>청구기호 <code>SDM 006.3 오51ㅇ</code> · 대출가능 · TTL 24h</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3>titleStatement를 그대로 쓰면 안 된다</h3>
-    <p>
-      KORMARC 245 원문이 그대로 온다. 세 가지가 섞여 있다.
-    </p>
-    <pre><code>"<span class="c-star">(한국인이 알아야 할)</span> 인공지능"            <span class="c-dim">→ 괄호 접두는 제목이 아니다</span>
-"인공지능 <span class="c-star">:</span> 수학적 이해에서 알고리즘까지"    <span class="c-dim">→ " : " 이후는 부제</span>
-"인공지능 <span class="c-star">/</span> 이건명 지음"                   <span class="c-dim">→ " / " 이후는 책임표시</span></code></pre>
-    <p>
-      <code>title</code>에는 본제목만 넣고, <strong><code>title_norm</code>에는 부제를 넣지 않는다</strong> &mdash;
-      부제 유무가 유사도를 흔들어서, 2단계 판본 묶기에서 바로 문제가 된다.
-      검색 응답의 <code>author</code>도 제1저자뿐이라 전체 저자는 MARC 100·700에서 가져와야 한다.
-    </p>
-
-    <h3>초기 추천을 부트스트랩할 재료가 이미 있다</h3>
-    <p>
-      Pyxis 검색 응답의 <code>similars[]</code>는 벤더가 이미 계산해 둔 유사자료다.
-      우주가 비어 있는 초기에는 &ldquo;한 칸 옆&rdquo; 추천의 재료가 없으므로 그동안 이 값을 쓰고,
-      사용자가 쌓이면 <code>universe_edges</code> 기반으로 갈아탄다.
-    </p>
+    <p class="kicker">프라이버시</p>
+    <h2>집계만 나간다. 다만 역추론 여지는 남는다</h2>
 
     <div class="split">
       <div>
-        <h4>전역에 저장한다</h4>
+        <h4>들어 있는 것</h4>
         <ul>
-          <li>제목 · 저자 · 연도 · 출판사</li>
-          <li>ISBN13 · <code>pyxis:pnu</code></li>
-          <li><strong>초록</strong> (MARC 520) &mdash; 우리 목록 데이터라 제약이 없다</li>
-          <li>등록·연결의 집계 수치</li>
+          <li>제목 · 부제 · 저자 · 출판사 · 연도 · 판본</li>
+          <li>자료유형 · 서지 ID · 좌표 · 성단</li>
+          <li>등급(1&ndash;5 구간화) · 선 굵기(구간화)</li>
+          <li>등록자 수 &mdash; <strong>3명 이상일 때만</strong></li>
         </ul>
       </div>
       <div>
-        <h4>저장하지 않는다</h4>
+        <h4>없는 것 (스캔으로 확인)</h4>
         <ul>
-          <li>대출·열람 이력 <span class="c-dim">(자동 연동 금지)</span></li>
-          <li>남의 메모 · 남의 좌표 <span class="c-dim">(애초에 공개 출구에 없다)</span></li>
-          <li>5단계에서 EBSCO를 붙이면 <strong>그 출처의 초록</strong>은 저장하지 않는다 &mdash;
-              <code>works.abstract</code>는 출처가 Pyxis인 행에만 채운다</li>
+          <li>이메일 · 전화번호 · 학번 · 주민번호꼴 &mdash; <strong>0건</strong></li>
+          <li>DB 계정 · 호스트 · 스키마명 &mdash; <strong>0건</strong></li>
+          <li>이용자 식별자 &mdash; 집계가 SQL 안에서 끝난다</li>
+          <li>등록자 원시값 3 미만 &mdash; <strong>0건</strong></li>
         </ul>
       </div>
+    </div>
+
+    <div class="note warn">
+      <span class="tag">남아 있는 위험</span>
+      <p>
+        연결선 임계값을 <strong>k=2</strong>로 두었다. 선 24,101개 중 23,233개가 &ldquo;딱 두 명이 함께 담은 쌍&rdquo;이다.
+        희귀한 조합이면 그 분야 사람에게는 누군지 좁혀질 수 있다. 등록자 2명인 별도 그대로 뜬다.
+      </p>
+      <p>
+        의도된 선택이다 &mdash; k=3에서는 선이 487개뿐이어서 겹침이 화면에 나타나지 않았다.
+        <strong>공개 전환 시에는 이 부분이 판단 대상이다.</strong>
+      </p>
     </div>
   </section>
 
   <!-- ══ 6 ══ -->
   <section>
-    <p class="kicker">등록 동선</p>
-    <h2>드롭하면 먼저 놓이고, 나중에 채워진다</h2>
+    <p class="kicker">도서관 데이터</p>
+    <h2>목록은 그대로 쓸 수 없다</h2>
     <p>
-      카드를 캔버스에 떨어뜨리는 순간 회색 노드가 그 자리에 먼저 놓인다. 서버 응답을 기다리지 않는다.
-      resolve가 끝나면 실제 데이터로 채워지며 별이 점화된다.
+      전부 실측에서 나온 규칙이고 <code>docs/library-data.md</code>가 사양서다. 코드가 이대로 구현되어 있다.
     </p>
 
-    <pre><code>Pyxis 검색 카드 ──드래그──▶ 캔버스 드롭 <span class="c-dim">(좌표 확보)</span>
-                              │
-              <span class="c-key">식별자 추출</span>  isbn13 <span class="c-dim">(있으면)</span> + pyxis:pnu <span class="c-dim">(항상)</span>
-                              │
-                    work_identifiers 조회
-                       ├ <span class="c-star">HIT</span>  ─────▶ 기존 별에 합류   <span class="c-dim">이미 누가 등록한 자료</span>
-                       └ <span class="c-star">MISS</span> ─────▶ GET /biblios/{id} <span class="c-dim">MARC 상세</span>
-                                       └▶ works 1 + editions 1  <span class="c-dim">새 별</span>
-                              │
-              access_links 기록 <span class="c-dim">(청구기호·소장처·대출상태)</span> ──▶ 노드 생성</code></pre>
+    <div class="t-scroll">
+      <table>
+        <caption>읽을 때 반드시 처리해야 하는 것</caption>
+        <thead><tr><th>필드</th><th>문제</th><th>처리</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="mono-cell">TITLE_STATEMENT</td>
+            <td>KORMARC 245 원문 &mdash; <code>(괄호 접두)</code>·<code> : 부제</code>·<code> / 책임표시</code>가 섞임</td>
+            <td>셋을 분해. 부제는 유사도 비교에서 제외</td>
+          </tr>
+          <tr>
+            <td class="mono-cell">ALL_AUTHOR</td>
+            <td>JSON 배열 문자열 &mdash; <code>["한강","한강 지음"]</code></td>
+            <td>풀고 역할어 제거, 중복 제거</td>
+          </tr>
+          <tr>
+            <td class="mono-cell">MATERIAL_TYPE</td>
+            <td>11종. <code>CR</code>(연속간행물)은 저작이 아니라 컨테이너</td>
+            <td><code>CR</code> 제외, 나머지를 book/paper/media로</td>
+          </tr>
+          <tr>
+            <td class="mono-cell">CALL_NO</td>
+            <td>DDC 97%인데 KDC가 섞여 있음 &mdash; 회계원리가 <code>657</code>과 <code>325.9</code> 양쪽</td>
+            <td>주제 좌표를 넣을 때 체계 판별 필요</td>
+          </tr>
+          <tr>
+            <td class="mono-cell">MARC 520</td>
+            <td>초록 보유율 <strong>1.9%</strong></td>
+            <td>자료 의미는 제목·저자·청구기호로만</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <p>
-      <strong>애매한 판정이 없다.</strong> 같은 자료를 두 사람이 등록하면 식별자가 충돌하면서
-      자동으로 같은 별에 모이고, 그게 겹침의 전부다.
-      2단계에서 판본 묶기를 켤 때 &mdash; 그때 비로소 &ldquo;혹시 같은 책인가요?&rdquo;를 묻는
-      확인 대기 상태가 들어온다.
-    </p>
-
-    <h3>연결 그리기</h3>
-    <p>
-      노드 테두리의 앵커를 끌어 다른 노드에 떨어뜨리면 관계 타입을 고른다 &mdash;
-      <strong>인용함 · 반박함 · 같은주제 · 방법론차용 · 후속연구</strong>. 다섯 개 고정이다.
-      자유 입력을 허용하면 전역 집계가 불가능해진다.
+      <strong>중복 목록 레코드도 있다.</strong> <code>새마을 運動 10年史</code>와 <code>새마을運動 10年史</code>가 별개
+      레코드이고, 같은 ISBN을 가진 레코드도 둘 이상 존재한다. 동시등장 그래프가 이런 중복을 자동으로
+      드러내므로 <em>목록 정비 재료</em>로 쓸 수 있다.
     </p>
   </section>
 
   <!-- ══ 7 ══ -->
   <section>
-    <p class="kicker">순서</p>
-    <h2>우주는 나중에 얹어도 된다</h2>
+    <p class="kicker">없는 것</p>
+    <h2>여기까지가 정직한 범위다</h2>
+    <ul class="todo">
+      <li><strong>우리 DB</strong> &mdash; 설계는 했지만 만들지 않았다. 그래서 유니버스가 실시간이 아니라 스냅샷이다</li>
+      <li><strong>로그인</strong> &mdash; 따라서 &ldquo;우주에서 내 위치&rdquo; 화면도 없다</li>
+      <li><strong>개인 별자리</strong> &mdash; 검색·드래그·연결까지 동작했지만 삭제했다. 유니버스에 집중하기로 했다</li>
+      <li><strong>고립된 별 7,528개(67%)의 좌표</strong> &mdash; 선이 없으면 배치 근거가 없어 해시로 흩뿌려져 있다.
+          가장 큰 미해결 문제다</li>
+      <li><strong>성단 이름</strong> &mdash; 161개 중 78개가 무명이다. 제목 낱말 빈도로는 큰 성단일수록 이름이 안 나온다</li>
+    </ul>
+  </section>
+
+  <!-- ══ 8 ══ -->
+  <section>
+    <p class="kicker">다음</p>
+    <h2>AI가 붙을 자리는 결함이 지목한다</h2>
     <p>
-      1단계에서 전역 화면을 만들지 않아도 데이터는 이미 쌓인다.
-      집계 뷰는 나중에 얹어도 그동안의 등록이 전부 반영된다.
+      남은 결함 대부분이 규칙으로는 안 되는 일이다. 배치 작업으로 한 번 돌려 결과를 JSON에 구워두면
+      서비스 런타임에는 AI 호출이 없다 &mdash; 장애점도 지연도 없다.
     </p>
 
     <ol class="phases">
       <li>
         <div>
-          <b>내 서재 + Pyxis 어댑터 + resolve(1:1)</b>
-          <span>외부 의존이 하나도 없다. 확인할 것 &mdash; 드래그해서 별을 놓는 게 재미있는가.</span>
+          <b>성단 이름 짓기</b>
+          <span>구성 자료 제목을 주고 한 구절로 명명. 161회 호출 · 약 $0.55. 결과를 사람이 바로 검증할 수 있어 첫 타석으로 적합하다.</span>
         </div>
       </li>
       <li>
         <div>
-          <b>집계 뷰 + 배치 레이아웃 + 전체 유니버스</b>
-          <span>확인할 것 &mdash; 군집이 눈에 보이기 시작하는가. 같은 학교라 50명이 분기점이 된다.</span>
+          <b>고립된 별에 의미 좌표 주기</b>
+          <span>제목·저자·청구기호로 주제 태그를 붙여 7,528개(67%)가 제자리를 갖게 한다. 효과는 가장 크지만 검증이 어렵다.</span>
         </div>
       </li>
       <li>
         <div>
-          <b>내 위치 오버레이 + 한 칸 옆 추천</b>
-          <span>확인할 것 &mdash; &ldquo;당신의 하늘은 여기입니다&rdquo; 순간이 먹히는가.</span>
+          <b>판본·중복 판정</b>
+          <span>한자·번역·띄어쓰기 차이는 규칙으로 못 잡는다. 서비스가 아니라 도서관 목록 정비 쪽 값이다.</span>
         </div>
       </li>
       <li>
         <div>
-          <b>판본 묶기 (유사도 ON) + 성단 이름 투표</b>
-          <span>사용자 제안이 쌓인 뒤에 켠다. 확인할 것 &mdash; 판본이 합쳐지면 겹침이 더 선명해지는가.</span>
-        </div>
-      </li>
-      <li>
-        <div>
-          <b>EDS 편입 (학술논문) · 웹문서 등록</b>
-          <span>여기서 처음으로 외부 자격증명이 필요해진다. 범위를 넓힐 값이 확인된 뒤에 간다.</span>
+          <b>의미 검색</b>
+          <span>&ldquo;공정 실무를 배우고 싶은데&rdquo; 같은 질의. 벡터 검색이 필요해서 DB가 먼저다.</span>
         </div>
       </li>
     </ol>
 
-    <div class="note">
-      <span class="tag">범위를 좁혀서 얻는 것</span>
-      <p>
-        전 세계를 대상으로 열면 초기 사용자 50명이 각자 다른 자료를 등록해 별이 전부 흩어지고,
-        겹침이라는 핵심 기능이 화면에 아예 나타나지 않는다. 같은 학교면 정반대다 &mdash;
-        같은 수업, 같은 지도교수, 같은 학과. <strong>읽는 자료가 겹칠 확률이 압도적으로 높다.</strong>
-      </p>
-    </div>
-  </section>
-
-  <!-- ══ 8 ══ -->
-  <section>
-    <p class="kicker">다음 할 일</p>
-    <h2>막힌 곳이 없다</h2>
-    <p>
-      범위를 소장자료로 줄이면서 유일한 외부 의존이던 EBSCO 자격증명이 5단계로 밀렸다.
-      1단계를 시작하기 위해 기다려야 할 것은 아무것도 없다. 남은 건 우리가 정하는 일들뿐이다.
-    </p>
-    <ul class="todo">
-      <li>Pyxis <code>all=필드|연산자|값</code> 문법의 필드 코드 전수 확인 (벤더 문서) &mdash;
-          제목·저자 한정 검색에 필요</li>
-      <li>Pyxis 상세 페이지 URL 패턴 확정 &mdash; 인스펙터의 &ldquo;도서관에서 보기&rdquo; 목적지</li>
-      <li>교내 SSO 연동 &mdash; 학번은 salt+hash로만, 소속은 단과대 수준까지만</li>
-      <li>원본 테이블 직접 조회용 계정을 서비스 롤과 분리하고 감사 로그 연결</li>
-      <li>개인정보 처리방침에 <strong>&ldquo;식별 가능한 형태로 저장, 공개 화면에서는 집계로만 표시&rdquo;</strong>로 정확히 기재</li>
-    </ul>
-
     <div class="note warn">
-      <span class="tag">전산 담당자에게</span>
+      <span class="tag">보내기 전에 정할 것</span>
       <p>
-        <strong>대출·열람 이력을 자동으로 끌어오지 말 것.</strong> 도서관 이용 기록은 이용자 비밀보호 의무가 걸린 정보다.
-        &ldquo;내 대출 이력에서 별 가져오기&rdquo;는 사용자가 매번 직접 누르는 명시적 가져오기로만 두고,
-        가져온 뒤에도 기본은 비공개여야 한다. 편의를 위해 자동 연동하고 싶은 유혹이 클 텐데,
-        이 서비스에서 유일하게 되돌릴 수 없는 사고가 날 수 있는 지점이다.
+        외부로 나가는 건 <strong>자료 제목 목록</strong>뿐이라 개인 식별은 불가능하다. 다만 성단 최소 크기가
+        4종이어서 <strong>한 사람이 담은 4권이 그대로 성단이 될 수 있다</strong> &mdash; 성단에도 k-임계값을 적용해야
+        한다. 학내에서 외부 AI API 사용이 별도 검토 대상인지도 확인이 필요하다.
       </p>
     </div>
   </section>
 
   <footer>
-    <span>별자리 서재 · 설계 v0.1</span>
-    <span>schema.sql · screens.md · library-data.md</span>
-    <span>실측 2026-09-16</span>
+    <span>별자리 서재 · 현재 상태</span>
+    <span>README.md · schema.sql · screens.md · library-data.md</span>
+    <span>스냅샷 2026-09-16</span>
   </footer>
 
 </div>
