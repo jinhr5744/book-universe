@@ -36,13 +36,13 @@ import oracledb
 
 sys.stdout.reconfigure(encoding="utf-8")
 
-PROJECT = r"C:\Users\AA\Documents\book-universe"
+# 저장소 루트 — 스크립트 위치에서 유도한다 (절대경로 하드코딩 금지)
+PROJECT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(PROJECT, "public", "universe.json")
 
 MIN_REGISTRANTS = 2
 EDGE_K = int(sys.argv[1]) if len(sys.argv) > 1 else 2
 SHELF_MAX = 400          # 이보다 큰 서재는 큐레이션 계정에 가깝다 (81명, 상위 0.7%)
-SCHEMA = "SOLARS8"
 
 # ── 접속 ────────────────────────────────────────────────────────────────
 env = {}
@@ -50,6 +50,11 @@ for line in io.open(os.path.join(PROJECT, ".db.env"), encoding="utf-8"):
     if "=" in line:
         k, _, v = line.partition("=")
         env[k.strip()] = v.strip()
+
+# 운영 스키마 이름도 기관 설정이라 .db.env 로 뺀다 (기본값을 두지 않는다)
+SCHEMA = env.get("DB_SCHEMA")
+if not SCHEMA:
+    sys.exit(".db.env 에 DB_SCHEMA 를 설정하세요 (.db.env.example 참고)")
 
 conn = oracledb.connect(user=env["DB_USER"], password=env["DB_PASSWORD"], dsn=env["DB_DSN"])
 cur = conn.cursor()

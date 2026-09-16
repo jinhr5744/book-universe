@@ -236,10 +236,12 @@ Pyxis 검색 응답의 `similars[]` 는 벤더가 이미 계산해 둔 유사자
 해외 저널이 한 인덱스에 통합되어 있고, **EDS 레코드는 DOI를 포함한다.**
 2단계의 핵심 가치는 여기서 `authority='global'` 식별자가 대량으로 들어온다는 점이다.
 
+실제 값은 저장소에 두지 않는다 — `docs/institution.local.md` (gitignore) 에 있다.
+
 ```
-EDS 프로파일         pusannat.eds.edsapi     (base64: cHVzYW5uYXQuZWRzLmVkc2FwaQ==)
-Publication Finder   pusannat.main.pfui
-FOLIO ERM tenant     fs00001276
+EDS 프로파일         {TENANT}.eds.edsapi
+Publication Finder   {TENANT}.main.pfui
+FOLIO ERM tenant     {FOLIO_TENANT}
 ```
 
 > **위젯 엔드포인트를 서버에서 호출하지 말 것.**
@@ -254,7 +256,7 @@ DOI가 없는 레코드(국내 학위논문, 일부 KCI)는 `kci` / `dcollection
 ## EBSCO Publication Finder — 전자책 / 전자저널
 
 ```
-GET https://api.ebsco.io/pf/v1/pfaccount/pusannat.main.pfui/publications
+GET https://api.ebsco.io/pf/v1/pfaccount/{TENANT}.main.pfui/publications
       ?search={질의어}&resourceTypeFacet=book|journal|...
 ```
 

@@ -13,3 +13,6 @@ next-env.d.ts
 .db.env
 *.env
 !.env.example
+
+# 기관 설정값 등 로컬 전용 메모
+*.local.md

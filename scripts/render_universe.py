@@ -5,7 +5,8 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 sys.stdout.reconfigure(encoding="utf-8")
-PROJECT = r"C:\Users\AA\Documents\book-universe"
+# 저장소 루트 — 스크립트 위치에서 유도한다
+PROJECT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(PROJECT, "public", "universe.json")
 OUT = os.path.join(PROJECT, "public", sys.argv[1] if len(sys.argv) > 1 else "universe.png")
 

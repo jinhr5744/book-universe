@@ -21,7 +21,8 @@ python scripts/build_universe.py 2     # 2 = 선을 그리는 임계값(k)
 python scripts/render_universe.py      # public/universe.png
 ```
 
-`.db.env` 의 계정으로 도서관 Oracle(SOLARS8)에 **읽기 전용**으로 붙어 집계한다.
+`.db.env` 의 계정으로 도서관 Oracle에 **읽기 전용**으로 붙어 집계한다.
+`.db.env.example` 을 복사해 채운다 — 계정·DSN·스키마 모두 여기에 둔다 (커밋되지 않는다).
 이용자 식별자는 SQL 안에서만 쓰이고 결과물에 남지 않는다.
 
 ## 문서
