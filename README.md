@@ -29,13 +29,14 @@ python scripts/render_universe.py      # public/universe.png
 
 - `docs/schema.sql` — 설계한 DB 스키마 (**아직 만들지 않았다**)
 - `docs/screens.md` — 화면 설계와 현재 구현 상태
-- `docs/adapter-library.md` — 도서관 API 실측 명세
+- `docs/library-data.md` — 도서관 목록 데이터를 읽는 규칙 (살아 있는 코드의 사양서)
 - `docs/design-page.html` — 설계 문서 웹 버전
 
 ## 없는 것
 
 Pyxis 검색 어댑터(`lib/pyxis`)와 검색 프록시(`app/api/search`)는 개인 서재 기능과 함께
-걷어냈다. 실측 명세는 `docs/adapter-library.md` 에 남아 있으니 다시 붙일 때 참고한다.
+걷어냈다. 지금 도서관 데이터는 `scripts/build_universe.py` 가 Oracle 에서 직접 읽는다 —
+읽는 규칙은 `docs/library-data.md` 에 있다.
 
 ## 아직 없는 것
 

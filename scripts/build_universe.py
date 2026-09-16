@@ -445,7 +445,7 @@ linked = len({a for a, b, c in all_edges} | {b for a, b, c in all_edges})
 backbone = set(keep)
 out = {
     "generatedAt": "2026-09-16",
-    "source": f"부산대학교 도서관 내 서재 집계 ({SCHEMA}.PATRON_COLLECTION)",
+    "source": "부산대학교 도서관 내 서재 집계 (PATRON_COLLECTION)",   # 스키마명은 넣지 않는다
     "rules": {
         "unit": "개인 서재 하나 (폴더로 쪼개지 않음)",
         "minRegistrants": MIN_REGISTRANTS,
