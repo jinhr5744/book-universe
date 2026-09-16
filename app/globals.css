@@ -1,0 +1,101 @@
+/* 별자리 서재 — 토큰과 기본 스타일
+   설계 문서(docs/design-page.html)의 팔레트를 그대로 쓴다. */
+
+:root {
+  --paper: #e7ebf1;
+  --surface: #f8fafc;
+  --sunk: #dde3eb;
+  --ink: #111821;
+  --muted: #5a6675;
+  --line: #c6d0dc;
+  --hair: #d6dee7;
+  --accent: #2b6e8f;
+  --star: #a9761f;
+  --alert: #9c4738;
+  --ok: #3c6e52;
+
+  --sans: 'IBM Plex Sans KR', system-ui, -apple-system, 'Malgun Gothic', sans-serif;
+  --serif: 'Noto Serif KR', Georgia, serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', monospace;
+
+  --panel-w: 320px;
+  --inspector-w: 360px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --paper: #0a0f16;
+    --surface: #121a25;
+    --sunk: #0f151e;
+    --ink: #dce4ee;
+    --muted: #8694a6;
+    --line: #263243;
+    --hair: #1c2634;
+    --accent: #74b8da;
+    --star: #dcb264;
+    --alert: #d2806f;
+    --ok: #77b491;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.mono {
+  font-family: var(--mono);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

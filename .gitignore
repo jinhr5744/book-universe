@@ -1,0 +1,15 @@
+node_modules/
+.next/
+out/
+build/
+.env
+.env.local
+.env*.local
+next-env.d.ts
+*.tsbuildinfo
+.DS_Store
+
+# 로컬 자격증명 (프로젝트에 이미 있던 파일 포함)
+.db.env
+*.env
+!.env.example

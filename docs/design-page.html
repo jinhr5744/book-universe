@@ -1,0 +1,806 @@
+<title>별자리 서재</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;600&family=Noto+Serif+KR:wght@600&family=Spectral:wght@600&display=swap">
+
+<style>
+  :root {
+    --paper:   #E7EBF1;
+    --surface: #F8FAFC;
+    --sunk:    #DDE3EB;
+    --ink:     #111821;
+    --muted:   #5A6675;
+    --line:    #C6D0DC;
+    --hair:    #D6DEE7;
+    --accent:  #2B6E8F;
+    --star:    #A9761F;
+    --alert:   #9C4738;
+    --ok:      #3C6E52;
+
+    --serif: "Spectral", "Noto Serif KR", Georgia, serif;
+    --sans:  "IBM Plex Sans KR", system-ui, -apple-system, "Malgun Gothic", sans-serif;
+    --mono:  "IBM Plex Mono", ui-monospace, "Cascadia Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:   #0A0F16;
+      --surface: #121A25;
+      --sunk:    #0F151E;
+      --ink:     #DCE4EE;
+      --muted:   #8694A6;
+      --line:    #263243;
+      --hair:    #1C2634;
+      --accent:  #74B8DA;
+      --star:    #DCB264;
+      --alert:   #D2806F;
+      --ok:      #77B491;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:   #0A0F16;
+    --surface: #121A25;
+    --sunk:    #0F151E;
+    --ink:     #DCE4EE;
+    --muted:   #8694A6;
+    --line:    #263243;
+    --hair:    #1C2634;
+    --accent:  #74B8DA;
+    --star:    #DCB264;
+    --alert:   #D2806F;
+    --ok:      #77B491;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 780px;
+    margin: 0 auto;
+    padding-inline: 22px;
+    padding-block: 0 96px;
+  }
+
+  /* ── 머리말 ───────────────────────────────── */
+  .masthead {
+    padding-block: 72px 40px;
+    border-bottom: 2px solid var(--ink);
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 20px;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: clamp(38px, 7.4vw, 60px);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin: 0 0 18px;
+    text-wrap: balance;
+  }
+  .standfirst {
+    font-size: 18px;
+    color: var(--muted);
+    margin: 0;
+    max-width: 62ch;
+    text-wrap: pretty;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 26px;
+    margin-top: 30px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .meta b { color: var(--ink); font-weight: 500; }
+
+  /* ── 섹션 ─────────────────────────────────── */
+  section { padding-block: 52px 0; }
+  section + section { border-top: 1px solid var(--hair); margin-top: 52px; }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 27px;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+    text-wrap: balance;
+  }
+  .kicker {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 14px;
+  }
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 16.5px;
+    margin: 36px 0 8px;
+    letter-spacing: -0.005em;
+  }
+  p { margin: 0 0 16px; max-width: 68ch; text-wrap: pretty; }
+  .lede { font-size: 17.5px; color: var(--muted); margin-bottom: 26px; }
+  strong { font-weight: 600; }
+  em { font-style: normal; color: var(--accent); font-weight: 600; }
+  a { color: var(--accent); text-underline-offset: 3px; }
+  a:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px;
+  }
+  code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    background: var(--sunk);
+    padding: 0.12em 0.36em;
+    border-radius: 2px;
+  }
+
+  ul { margin: 0 0 16px; padding-left: 1.1em; max-width: 68ch; }
+  li { margin-bottom: 7px; }
+  li::marker { color: var(--muted); }
+
+  /* ── 세 화면 ──────────────────────────────── */
+  .screens {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    margin: 4px 0 28px;
+  }
+  .screen { background: var(--surface); padding: 20px 18px 22px; }
+  .screen .n {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em;
+    color: var(--accent); display: block; margin-bottom: 8px;
+  }
+  .screen h4 {
+    font-family: var(--serif); font-weight: 600; font-size: 19px;
+    margin: 0 0 8px; line-height: 1.25;
+  }
+  .screen p { font-size: 13.5px; color: var(--muted); margin: 0; line-height: 1.6; }
+  .screen .who {
+    display: inline-block; margin-top: 12px; font-family: var(--mono);
+    font-size: 11px; color: var(--ink); border: 1px solid var(--line);
+    padding: 2px 7px; background: var(--paper);
+  }
+
+  /* ── 다이어그램 ───────────────────────────── */
+  .figure { margin: 26px 0 30px; }
+  .figure-scroll { overflow-x: auto; padding-bottom: 6px; }
+  .figure svg { display: block; min-width: 640px; max-width: 100%; height: auto; }
+  figcaption {
+    font-size: 13px; color: var(--muted); margin-top: 12px;
+    font-family: var(--mono); line-height: 1.6;
+  }
+
+  /* ── 코드 ─────────────────────────────────── */
+  pre {
+    background: var(--sunk);
+    border: 1px solid var(--hair);
+    border-left: 2px solid var(--accent);
+    padding: 15px 17px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.68;
+    margin: 0 0 22px;
+  }
+  pre code { background: none; padding: 0; font-size: inherit; }
+  .c-dim { color: var(--muted); }
+  .c-key { color: var(--accent); }
+  .c-star { color: var(--star); }
+
+  /* ── 표 ───────────────────────────────────── */
+  .t-scroll { overflow-x: auto; margin: 0 0 24px; }
+  table { border-collapse: collapse; width: 100%; min-width: 480px; font-size: 14px; }
+  caption {
+    text-align: left; font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--muted); padding-bottom: 10px;
+  }
+  th {
+    text-align: left; font-weight: 600; font-size: 12px;
+    letter-spacing: 0.04em; color: var(--muted);
+    border-bottom: 1.5px solid var(--ink); padding: 0 14px 8px 0;
+    vertical-align: bottom;
+  }
+  td { border-bottom: 1px solid var(--hair); padding: 10px 14px 10px 0; vertical-align: top; line-height: 1.6; }
+  tr:last-child td { border-bottom: 1.5px solid var(--ink); }
+  td:last-child, th:last-child { padding-right: 0; }
+  .num { font-variant-numeric: tabular-nums; font-family: var(--mono); font-size: 13px; white-space: nowrap; }
+  .mono-cell { font-family: var(--mono); font-size: 12.5px; }
+
+  /* ── 콜아웃 ───────────────────────────────── */
+  .note {
+    border: 1px solid var(--line);
+    border-top: 2px solid var(--accent);
+    background: var(--surface);
+    padding: 18px 20px;
+    margin: 0 0 24px;
+  }
+  .note.warn { border-top-color: var(--alert); }
+  .note .tag {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 8px;
+  }
+  .note.warn .tag { color: var(--alert); }
+  .note p { margin: 0; font-size: 14.5px; }
+  .note p + p { margin-top: 10px; }
+
+  /* ── 대조 ─────────────────────────────────── */
+  .split {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+    background: var(--line); border: 1px solid var(--line); margin: 0 0 26px;
+  }
+  .split > div { background: var(--surface); padding: 18px 18px 20px; }
+  .split h4 {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em;
+    text-transform: uppercase; margin: 0 0 12px; color: var(--muted);
+  }
+  .split ul { margin: 0; padding-left: 1em; font-size: 14px; }
+  .split li { margin-bottom: 8px; line-height: 1.55; }
+
+  /* ── 단계 ─────────────────────────────────── */
+  .phases { list-style: none; padding: 0; margin: 0 0 22px; max-width: none; counter-reset: p; }
+  .phases li {
+    display: grid; grid-template-columns: 34px 1fr; gap: 16px;
+    padding: 16px 0; border-bottom: 1px solid var(--hair); margin: 0;
+  }
+  .phases li::before {
+    counter-increment: p; content: counter(p);
+    font-family: var(--mono); font-size: 13px; color: var(--accent);
+    border: 1px solid var(--line); width: 28px; height: 28px;
+    display: grid; place-items: center; background: var(--surface);
+  }
+  .phases b { display: block; font-weight: 600; margin-bottom: 3px; }
+  .phases span { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  /* ── 체크리스트 ───────────────────────────── */
+  .todo { list-style: none; padding: 0; margin: 0; max-width: 68ch; }
+  .todo li {
+    padding-left: 30px; position: relative; margin-bottom: 13px; font-size: 15px;
+  }
+  .todo li::before {
+    content: ""; position: absolute; left: 0; top: 7px;
+    width: 13px; height: 13px; border: 1.5px solid var(--muted);
+  }
+
+  footer {
+    margin-top: 56px; padding-top: 22px; border-top: 2px solid var(--ink);
+    font-family: var(--mono); font-size: 12px; color: var(--muted);
+    display: flex; flex-wrap: wrap; gap: 6px 22px;
+  }
+
+  @media (max-width: 660px) {
+    .screens, .split { grid-template-columns: 1fr; }
+    .masthead { padding-block: 48px 30px; }
+    h2 { font-size: 23px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">부산대학교 도서관 · 서비스 설계</p>
+    <h1>별자리 서재</h1>
+    <p class="standfirst">
+      각자의 서재를 별자리로 그리고, 그 별자리들이 겹치는 곳에서 학교 전체의 밤하늘이 떠오르는 서비스.
+      개인의 서재는 끝까지 비공개이고, 공개되는 것은 오직 겹침뿐이다.
+    </p>
+    <div class="meta">
+      <span>설계 v0.2 · <b>2026-09-16</b></span>
+      <span>1단계 범위 · <b>소장자료 (Pyxis)</b></span>
+      <span>저장 · <b>Postgres + RLS</b></span>
+    </div>
+  </header>
+
+  <!-- ══ 1 ══ -->
+  <section>
+    <p class="kicker">무엇을 만드는가</p>
+    <h2>화면은 셋, 그중 하나는 레이어다</h2>
+    <p class="lede">
+      개인 캔버스와 전역 우주는 좌표계를 공유하지 않는다. 남이 자료를 등록해도 내 별자리가 흐트러지지 않고,
+      내가 무엇을 등록해도 우주의 모양이 흔들리지 않는다.
+    </p>
+
+    <div class="screens">
+      <div class="screen">
+        <span class="n">CANVAS</span>
+        <h4>내 서재</h4>
+        <p>검색 결과를 끌어다 놓아 별을 만들고, 별과 별을 잇는다. 좌표는 내가 놓은 그대로 영구히 고정된다.</p>
+        <span class="who">본인만</span>
+      </div>
+      <div class="screen">
+        <span class="n">UNIVERSE</span>
+        <h4>전체 유니버스</h4>
+        <p>모두의 별자리가 겹쳐 만들어진 밤하늘. 여러 사람이 같은 연결을 그을수록 그 선이 굵어진다.</p>
+        <span class="who">누구나</span>
+      </div>
+      <div class="screen">
+        <span class="n">OVERLAY</span>
+        <h4>내 위치</h4>
+        <p>로그인하면 회색 우주에서 내 별들만 색이 차오르고, 카메라가 내 별자리의 무게중심으로 날아간다.</p>
+        <span class="who">본인에게만</span>
+      </div>
+    </div>
+
+    <p>
+      세 번째가 구현이 가장 쉽다. 좌표를 새로 계산하는 게 아니라 <em>내 work_id 집합</em> 하나로
+      색만 바꾸는 레이어이기 때문이다. 쿼리 한 줄, 렌더 패스 하나면 된다.
+    </p>
+  </section>
+
+  <!-- ══ 2 ══ -->
+  <section>
+    <p class="kicker">데이터 모델</p>
+    <h2>별은 판본이 아니라 저작이다</h2>
+    <p>
+      『1984』의 민음사 양장본과 문고본, Penguin 원서는 ISBN이 전부 다르다. ISBN 단위로 별을 만들면
+      같은 책을 읽은 세 사람이 서로 다른 별 셋으로 흩어진다. 겹침을 보겠다는 목표가 정면으로 깨진다.
+    </p>
+    <p>
+      소장 목록 안에서도 같은 일이 일어난다. 그리고 나중에 학술논문을 붙이면 arXiv 프리프린트와
+      학회 게재본에서 똑같은 문제가 반복된다. 그래서 <strong>저작(Work)</strong>과
+      <strong>판본(Edition)</strong>을 나눈다. 사용자는 검색에서 판본을 집지만,
+      하늘에 뜨는 별은 저작이다.
+    </p>
+
+    <pre><code><span class="c-star">Work</span>  "인공지능 : 수학적 이해에서 알고리즘까지"  오상훈   <span class="c-dim">← 하늘에 뜨는 단위</span>
+ └ <span class="c-key">Edition</span>  홍릉 2025 <span class="c-star">"개정판"</span>  isbn13 <span class="c-dim">9791156002635</span>  pyxis <span class="c-dim">100838844</span>
+             ↑ <span class="c-dim">Pyxis 가 edition 필드로 "개정판"을 준다.
+               초판이 목록에 있다면 그건 별개 레코드다 — 합칠 자리가 여기다.</span></code></pre>
+
+    <p>
+      1단계에서는 레코드 하나가 Work 하나 + Edition 하나가 된다. 구조를 지금 만들어두는 이유는
+      <strong>나중에 넣을 수 없기 때문</strong>이다. 판본을 실제로 묶는 건 2단계, 원서와 번역본이
+      같은 별에 모이는 건 그다음이다.
+    </p>
+
+    <h3>중복 판정은 제약조건이 대신한다</h3>
+    <p>
+      식별자 테이블의 기본키를 <code>(scheme, value_norm)</code>으로 잡으면
+      &ldquo;하나의 식별자는 하나의 별에만&rdquo;이 애플리케이션 로직이 아니라 DB 불변식이 된다.
+      판정 코드에 버그가 있어도 데이터는 갈라지지 않는다.
+    </p>
+
+    <h3>자료유형 11종 중 하나만 뺀다</h3>
+    <p>
+      Pyxis가 <code>/material-types</code>로 전 11종을 내려준다. 검색 패널의 필터는
+      <strong>하드코딩하지 말고 이 엔드포인트로 채운다.</strong>
+    </p>
+
+    <div class="t-scroll">
+      <table>
+        <caption>Pyxis materialType → work_type · 실측 11종</caption>
+        <thead><tr><th>code</th><th>자료유형</th><th>work_type</th><th>1단계</th></tr></thead>
+        <tbody>
+          <tr><td class="mono-cell">BK · RB</td><td>단행본 · 고서</td><td class="mono-cell">book</td><td>포함</td></tr>
+          <tr><td class="mono-cell">TH · AT · RP</td><td>학위논문 · 기사 · 보고서</td><td class="mono-cell">paper</td><td>포함</td></tr>
+          <tr><td class="mono-cell">MP · ML · VM · MX</td><td>지도 · 음악 · 시청각 · 복합</td><td class="mono-cell">media</td><td>포함</td></tr>
+          <tr><td class="mono-cell">ER</td><td>전자자료</td><td class="mono-cell">내용에 따라</td><td>포함</td></tr>
+          <tr><td class="mono-cell">CR</td><td>연속간행물</td><td>&mdash;</td><td><strong>제외</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>
+      <code>CR</code>만 뺀다. 저널은 저작이 아니라 컨테이너다 &mdash; 논문 한 편과 저널 한 종이
+      같은 층위로 하늘에 뜨면 별자리의 의미가 깨진다.
+    </p>
+
+    <h3>식별자에 권위 등급을 붙인다</h3>
+    <p>
+      소장자료만 다루면 DOI가 거의 없다. 그런데 <strong>학위논문·보고서·고서·오래된 자료는
+      ISBN도 없다.</strong> 이들을 &lsquo;식별자 없는 자료&rsquo;로 취급하면 아래 k-임계값에 걸려
+      영원히 우주에 뜨지 못한다.
+    </p>
+    <p>
+      소장 목록에 오른 자료는 <em>사서가 목록을 만든 자료</em>다. 실재가 이미 보증되어 있다.
+      그래서 Pyxis 레코드 ID를 <code>authority='local'</code> 식별자로 인정한다.
+      지킬 선은 두 개다 &mdash; <code>global</code>(ISBN·DOI)과 스키마 수준에서 구분하고,
+      나중에 ISBN이 발견되면 <code>global</code> 행을 추가해 그쪽을 우선한다.
+      다기관으로 넓힐 때 재정합이 필요한 것은 <code>local</code> 행뿐이다.
+    </p>
+
+    <h3>1단계에서는 유사도 매칭을 끈다</h3>
+    <p>
+      단일 도서관 목록이라 한 자료 = 한 레코드다. <strong>Pyxis 레코드 1개 = Work 1개 + Edition 1개.</strong>
+      자동 병합 없음. 같은 자료를 두 사람이 등록하면 식별자가 충돌하면서 자동으로 같은 별에 모인다 &mdash;
+      겹침은 그게 전부고, 애매한 판정이 없다.
+    </p>
+    <p>
+      유사도를 스키마에 남겨두는 건 역할이 바뀌기 때문이다. <em>중복 제거</em>에서
+      <em>판본 묶기</em>로 &mdash; 『인공지능』 2018년판과 2025 개정판은 Pyxis에 별개 레코드로
+      존재하고, 이들을 한 별로 모으는 일이 남는다. 틀려도 두 별이 하나로 합쳐질 뿐이고
+      되돌릴 수 있지만, 1단계부터 자동으로 켜면 오병합 리스크만 지고 얻는 게 적다.
+      인스펙터에 <strong>&ldquo;이 책은 저 별과 같은 책이에요&rdquo;</strong> 버튼만 두어 제안을 모아둔다.
+    </p>
+  </section>
+
+  <!-- ══ 3 ══ -->
+  <section>
+    <p class="kicker">프라이버시 경계</p>
+    <h2>저장은 신원째로, 표시는 집계만</h2>
+    <p>
+      익명으로 <em>수집</em>하는 게 아니다. 누가 무엇을 등록했는지는 DB에 그대로 남는다 &mdash;
+      그래야 &ldquo;우주에서 내 위치&rdquo;를 계산할 수 있고, 탈퇴할 때 그 사람 몫만 정확히 뺄 수 있다.
+      가리는 일은 <strong>표시 시점</strong>에 일어난다.
+    </p>
+
+    <div class="note warn">
+      <span class="tag">설계의 급소</span>
+      <p>
+        가리는 작업을 클라이언트나 서버 코드에서 하면 안 된다. 클라이언트에서 가리면 API 응답에
+        <code>user_id</code>가 그대로 실려 오고, 서버 코드에서 가리면 언젠가 엔드포인트를 하나 추가하면서 빠뜨린다.
+      </p>
+      <p>
+        <strong>DB 경계에 박아두면 신원 컬럼이 공개 질의 결과에 애초에 존재할 수 없다.</strong>
+      </p>
+    </div>
+
+    <figure class="figure">
+      <div class="figure-scroll">
+        <svg viewBox="0 0 700 372" role="img" aria-label="원본 테이블에서 공개 출구와 개인 출구가 갈라지는 구조도">
+          <defs>
+            <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--muted)"/>
+            </marker>
+          </defs>
+
+          <!-- 원본 -->
+          <rect x="70" y="8" width="560" height="74" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>
+          <text x="90" y="34" font-family="IBM Plex Mono, monospace" font-size="14" font-weight="500" fill="var(--ink)">nodes · edges · constellations</text>
+          <text x="90" y="56" font-family="IBM Plex Sans KR, sans-serif" font-size="12.5" fill="var(--muted)">신원 포함 · 좌표 · 메모 · 태그</text>
+          <text x="610" y="56" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="var(--alert)">RLS ON</text>
+
+          <!-- 분기선 -->
+          <path d="M 350 82 L 350 100 L 185 100 L 185 122" fill="none" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#ar)"/>
+          <path d="M 350 82 L 350 100 L 515 100 L 515 122" fill="none" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#ar)"/>
+
+          <!-- 공개 문 -->
+          <rect x="24" y="128" width="322" height="112" fill="var(--surface)" stroke="var(--line)" stroke-width="1"/>
+          <rect x="24" y="128" width="322" height="3" fill="var(--accent)"/>
+          <text x="44" y="156" font-family="IBM Plex Mono, monospace" font-size="11" letter-spacing="1.4" fill="var(--accent)">공개 출구</text>
+          <text x="44" y="182" font-family="IBM Plex Mono, monospace" font-size="13.5" fill="var(--ink)">universe_works</text>
+          <text x="44" y="202" font-family="IBM Plex Mono, monospace" font-size="13.5" fill="var(--ink)">universe_edges</text>
+          <text x="44" y="226" font-family="IBM Plex Sans KR, sans-serif" font-size="12" fill="var(--muted)">security_invoker OFF · user_id 컬럼 없음</text>
+
+          <!-- 개인 문 -->
+          <rect x="354" y="128" width="322" height="112" fill="var(--surface)" stroke="var(--line)" stroke-width="1"/>
+          <rect x="354" y="128" width="322" height="3" fill="var(--star)"/>
+          <text x="374" y="156" font-family="IBM Plex Mono, monospace" font-size="11" letter-spacing="1.4" fill="var(--star)">개인 출구</text>
+          <text x="374" y="182" font-family="IBM Plex Mono, monospace" font-size="13.5" fill="var(--ink)">my_overlay_works</text>
+          <text x="374" y="202" font-family="IBM Plex Mono, monospace" font-size="13.5" fill="var(--ink)">my_overlay_edges</text>
+          <text x="374" y="226" font-family="IBM Plex Sans KR, sans-serif" font-size="12" fill="var(--muted)">security_invoker ON · RLS가 내 행만 통과</text>
+
+          <path d="M 185 240 L 185 272" fill="none" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#ar)"/>
+          <path d="M 515 240 L 515 272" fill="none" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#ar)"/>
+
+          <!-- 소비처 -->
+          <rect x="24" y="278" width="322" height="66" fill="var(--paper)" stroke="var(--line)" stroke-width="1"/>
+          <text x="44" y="306" font-family="Noto Serif KR, serif" font-size="15" font-weight="600" fill="var(--ink)">전체 유니버스</text>
+          <text x="44" y="328" font-family="IBM Plex Sans KR, sans-serif" font-size="12" fill="var(--muted)">로그인 없이 누구나</text>
+
+          <rect x="354" y="278" width="322" height="66" fill="var(--paper)" stroke="var(--line)" stroke-width="1"/>
+          <text x="374" y="306" font-family="Noto Serif KR, serif" font-size="15" font-weight="600" fill="var(--ink)">내 위치 레이어</text>
+          <text x="374" y="328" font-family="IBM Plex Sans KR, sans-serif" font-size="12" fill="var(--muted)">로그인한 본인에게만</text>
+        </svg>
+      </div>
+      <figcaption>
+        공개 뷰와 개인 뷰의 security_invoker 설정이 정확히 반대다.<br>
+        공개는 소유자 권한으로 RLS를 넘어 집계하고, 개인은 호출자 권한이라 RLS가 내 행만 통과시킨다.
+      </figcaption>
+    </figure>
+
+    <h3>가려도 추론된다 &mdash; k-임계값</h3>
+    <p>
+      <code>user_id</code>를 완벽히 가려도 집계 자체에서 역추론이 된다.
+      희귀한 논문 두 편을 잇는 선이 1인짜리로 떠 있으면 그 분야 사람들은 누군지 안다.
+      <strong>연결은 &ldquo;읽었다&rdquo;보다 훨씬 사적인 정보다 &mdash; 그 사람의 생각이기 때문에.</strong>
+    </p>
+
+    <div class="t-scroll">
+      <table>
+        <caption>전역 우주 노출 규칙</caption>
+        <thead>
+          <tr><th>요소</th><th>남에게 보이는 조건</th><th>나에게</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>별 &mdash; 소장자료 <span class="c-dim">(식별자 있음)</span></td><td class="num">등록자 1명부터</td><td>항상</td></tr>
+          <tr><td>별 &mdash; 식별자 없는 자료 <span class="c-dim">(향후 웹문서)</span></td><td class="num">등록자 2명부터</td><td>항상</td></tr>
+          <tr><td><strong>연결선</strong></td><td class="num">서로 다른 3명부터</td><td>항상 (나에게만)</td></tr>
+          <tr><td>등록자 수 숫자</td><td class="num">3명 이상일 때만 노출</td><td>동일</td></tr>
+          <tr><td>누가 등록했는지</td><td>어떤 경로로도 불가</td><td>&mdash;</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>
+      밝기도 원시값으로 내보내지 않는다. 1&ndash;5 등급으로 구간화해서 <strong>1명과 2명이 같은 계급</strong>이
+      되게 한다. 항성 등급이 원래 로그 스케일이라 별자리 은유와도 맞는다.
+    </p>
+    <p>
+      1단계에서는 모든 소장자료가 식별자를 갖기 때문에 두 번째 행(2명부터)이 사실상 잠든다.
+      그 분기는 웹문서를 넣는 시점에 되살아난다 &mdash; 조건을 지금 심어두고 나중에 깨우는 편이,
+      나중에 급히 끼워넣는 것보다 안전하다.
+    </p>
+
+    <div class="note">
+      <span class="tag">제약이 만든 기능</span>
+      <p>
+        임계값에 못 미친 내 별은 우주에 없지만, 로그인한 나에게만 희미하게 그려준다.
+        좌표는 내가 그 별과 이어둔 다른 별들의 무게중심 근처에 띄우고
+        <strong>&ldquo;아직 당신만 보고 있는 별&rdquo;</strong> 배지를 단다.
+        두 번째 사람이 등록하는 순간 별이 점화되어 우주에 등재된다 &mdash; 이 서비스에서 가장 기분 좋은 순간이 된다.
+      </p>
+    </div>
+  </section>
+
+  <!-- ══ 4 ══ -->
+  <section>
+    <p class="kicker">실측 · 2026-09-16</p>
+    <h2>통합검색은 네 시스템의 합성이었다</h2>
+    <p class="lede">
+      <code>lib.pusan.ac.kr</code> 통합검색의 실제 네트워크 트래픽을 관측한 결과,
+      한 검색창 뒤에 서로 다른 네 개의 시스템이 붙어 있었다.
+      <strong>1단계는 이 중 소장자료 하나만 쓴다.</strong>
+    </p>
+
+    <div class="t-scroll">
+      <table>
+        <caption>&lsquo;인공지능&rsquo; 검색 · 실측</caption>
+        <thead>
+          <tr><th>탭</th><th class="num">건수</th><th>시스템</th><th>1단계</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>소장자료</td><td class="num">3,373</td>
+            <td><strong>Pyxis</strong> <span class="c-dim">자체 ILS · 우리 도메인</span></td>
+            <td><strong>포함</strong></td>
+          </tr>
+          <tr>
+            <td>학술논문</td><td class="num">72,327</td>
+            <td>EBSCO EDS</td>
+            <td class="c-dim">5단계</td>
+          </tr>
+          <tr>
+            <td>전자저널</td><td class="num">9</td>
+            <td rowspan="2">EBSCO Publication Finder</td>
+            <td rowspan="2" class="c-dim">5단계</td>
+          </tr>
+          <tr><td>전자책</td><td class="num">418</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>
+      소장자료만 쓰면 <strong>막힌 곳이 하나도 없다.</strong> Pyxis는 우리 도메인이고 외부
+      자격증명 대기가 없다. 그리고 벤더 메타데이터 라이선스 제약도 없다 &mdash; 소장 목록은
+      우리 데이터이므로 <em>MARC 520 초록까지 저장할 수 있다.</em>
+      EBSCO를 붙이는 순간 생기는 &ldquo;초록은 저장하지 말 것&rdquo; 제약이 1단계에는 아예 없다.
+    </p>
+
+    <h3>관측된 엔드포인트 &mdash; 전부 우리 도메인</h3>
+    <pre><code>GET /pyxis-api/1/collections/1/search?all=<span class="c-key">k|a|인공지능</span>&amp;max=20&amp;offset=0
+GET /pyxis-api/1/biblios/{id}                      <span class="c-dim">← MARC 원본 전체</span>
+GET /pyxis-api/1/material-types                    <span class="c-dim">← 자료유형 11종</span>
+GET /pyxis-api/collections/1/auto-completions/{q}  <span class="c-dim">← 검색 패널에 그대로</span>
+GET /pyxis-api/1/outer-biblio-images-by-isbn/{isbn13}</code></pre>
+
+    <p>
+      관측 시점에 <strong>인증 없이 응답했다.</strong> 그래도 서비스에서는 서버 프록시를 경유한다 &mdash;
+      레이트리밋과 캐시를 우리가 걸고, 나중에 EDS를 붙일 때 클라이언트 코드를 건드리지 않게 된다.
+    </p>
+  </section>
+
+  <!-- ══ 5 ══ -->
+  <section>
+    <p class="kicker">어댑터</p>
+    <h2>검색은 도서관에서, 정체성은 식별자로</h2>
+    <p>
+      Pyxis 레코드 ID(<code>100838844</code>)를 별의 정체성으로 쓰면 안 된다.
+      다른 학교로 넓히는 순간 같은 논문이 학교마다 다른 별이 되고, 도서관이 시스템을 교체하면
+      누적된 별자리가 통째로 고아가 된다. 로컬 ID는 <code>access_links</code>에만 넣는다 &mdash;
+      <strong>이 테이블을 통째로 지워도 별자리는 멀쩡하다.</strong>
+    </p>
+
+    <div class="t-scroll">
+      <table>
+        <caption>Pyxis 응답 → 스키마 매핑</caption>
+        <thead><tr><th>Pyxis 필드</th><th>우리 필드</th><th>비고</th></tr></thead>
+        <tbody>
+          <tr><td class="mono-cell">isbn</td><td class="mono-cell">work_identifiers(isbn13)</td><td>ISBN-13 하이픈 없이 그대로 온다</td></tr>
+          <tr><td class="mono-cell">titleStatement</td><td class="mono-cell">works.title</td><td><strong>정규화 필수.</strong> <code>(괄호 접두)</code>·<code> : 부제</code>·<code> / 책임표시</code>가 섞인 KORMARC 원문</td></tr>
+          <tr><td class="mono-cell">author</td><td class="mono-cell">works.authors</td><td>제1저자뿐 &mdash; 전체 저자는 <code>/biblios/{id}</code>의 100·700에서</td></tr>
+          <tr><td class="mono-cell">edition</td><td class="mono-cell">editions.label</td><td>&ldquo;개정판&rdquo; 등</td></tr>
+          <tr><td class="mono-cell">id</td><td class="mono-cell">access_links.local_record_id</td><td>정체성 아님</td></tr>
+          <tr><td class="mono-cell">branchVolumes[]</td><td class="mono-cell">access_links.holding</td><td>청구기호 <code>SDM 006.3 오51ㅇ</code> · 대출가능 · TTL 24h</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>titleStatement를 그대로 쓰면 안 된다</h3>
+    <p>
+      KORMARC 245 원문이 그대로 온다. 세 가지가 섞여 있다.
+    </p>
+    <pre><code>"<span class="c-star">(한국인이 알아야 할)</span> 인공지능"            <span class="c-dim">→ 괄호 접두는 제목이 아니다</span>
+"인공지능 <span class="c-star">:</span> 수학적 이해에서 알고리즘까지"    <span class="c-dim">→ " : " 이후는 부제</span>
+"인공지능 <span class="c-star">/</span> 이건명 지음"                   <span class="c-dim">→ " / " 이후는 책임표시</span></code></pre>
+    <p>
+      <code>title</code>에는 본제목만 넣고, <strong><code>title_norm</code>에는 부제를 넣지 않는다</strong> &mdash;
+      부제 유무가 유사도를 흔들어서, 2단계 판본 묶기에서 바로 문제가 된다.
+      검색 응답의 <code>author</code>도 제1저자뿐이라 전체 저자는 MARC 100·700에서 가져와야 한다.
+    </p>
+
+    <h3>초기 추천을 부트스트랩할 재료가 이미 있다</h3>
+    <p>
+      Pyxis 검색 응답의 <code>similars[]</code>는 벤더가 이미 계산해 둔 유사자료다.
+      우주가 비어 있는 초기에는 &ldquo;한 칸 옆&rdquo; 추천의 재료가 없으므로 그동안 이 값을 쓰고,
+      사용자가 쌓이면 <code>universe_edges</code> 기반으로 갈아탄다.
+    </p>
+
+    <div class="split">
+      <div>
+        <h4>전역에 저장한다</h4>
+        <ul>
+          <li>제목 · 저자 · 연도 · 출판사</li>
+          <li>ISBN13 · <code>pyxis:pnu</code></li>
+          <li><strong>초록</strong> (MARC 520) &mdash; 우리 목록 데이터라 제약이 없다</li>
+          <li>등록·연결의 집계 수치</li>
+        </ul>
+      </div>
+      <div>
+        <h4>저장하지 않는다</h4>
+        <ul>
+          <li>대출·열람 이력 <span class="c-dim">(자동 연동 금지)</span></li>
+          <li>남의 메모 · 남의 좌표 <span class="c-dim">(애초에 공개 출구에 없다)</span></li>
+          <li>5단계에서 EBSCO를 붙이면 <strong>그 출처의 초록</strong>은 저장하지 않는다 &mdash;
+              <code>works.abstract</code>는 출처가 Pyxis인 행에만 채운다</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 6 ══ -->
+  <section>
+    <p class="kicker">등록 동선</p>
+    <h2>드롭하면 먼저 놓이고, 나중에 채워진다</h2>
+    <p>
+      카드를 캔버스에 떨어뜨리는 순간 회색 노드가 그 자리에 먼저 놓인다. 서버 응답을 기다리지 않는다.
+      resolve가 끝나면 실제 데이터로 채워지며 별이 점화된다.
+    </p>
+
+    <pre><code>Pyxis 검색 카드 ──드래그──▶ 캔버스 드롭 <span class="c-dim">(좌표 확보)</span>
+                              │
+              <span class="c-key">식별자 추출</span>  isbn13 <span class="c-dim">(있으면)</span> + pyxis:pnu <span class="c-dim">(항상)</span>
+                              │
+                    work_identifiers 조회
+                       ├ <span class="c-star">HIT</span>  ─────▶ 기존 별에 합류   <span class="c-dim">이미 누가 등록한 자료</span>
+                       └ <span class="c-star">MISS</span> ─────▶ GET /biblios/{id} <span class="c-dim">MARC 상세</span>
+                                       └▶ works 1 + editions 1  <span class="c-dim">새 별</span>
+                              │
+              access_links 기록 <span class="c-dim">(청구기호·소장처·대출상태)</span> ──▶ 노드 생성</code></pre>
+
+    <p>
+      <strong>애매한 판정이 없다.</strong> 같은 자료를 두 사람이 등록하면 식별자가 충돌하면서
+      자동으로 같은 별에 모이고, 그게 겹침의 전부다.
+      2단계에서 판본 묶기를 켤 때 &mdash; 그때 비로소 &ldquo;혹시 같은 책인가요?&rdquo;를 묻는
+      확인 대기 상태가 들어온다.
+    </p>
+
+    <h3>연결 그리기</h3>
+    <p>
+      노드 테두리의 앵커를 끌어 다른 노드에 떨어뜨리면 관계 타입을 고른다 &mdash;
+      <strong>인용함 · 반박함 · 같은주제 · 방법론차용 · 후속연구</strong>. 다섯 개 고정이다.
+      자유 입력을 허용하면 전역 집계가 불가능해진다.
+    </p>
+  </section>
+
+  <!-- ══ 7 ══ -->
+  <section>
+    <p class="kicker">순서</p>
+    <h2>우주는 나중에 얹어도 된다</h2>
+    <p>
+      1단계에서 전역 화면을 만들지 않아도 데이터는 이미 쌓인다.
+      집계 뷰는 나중에 얹어도 그동안의 등록이 전부 반영된다.
+    </p>
+
+    <ol class="phases">
+      <li>
+        <div>
+          <b>내 서재 + Pyxis 어댑터 + resolve(1:1)</b>
+          <span>외부 의존이 하나도 없다. 확인할 것 &mdash; 드래그해서 별을 놓는 게 재미있는가.</span>
+        </div>
+      </li>
+      <li>
+        <div>
+          <b>집계 뷰 + 배치 레이아웃 + 전체 유니버스</b>
+          <span>확인할 것 &mdash; 군집이 눈에 보이기 시작하는가. 같은 학교라 50명이 분기점이 된다.</span>
+        </div>
+      </li>
+      <li>
+        <div>
+          <b>내 위치 오버레이 + 한 칸 옆 추천</b>
+          <span>확인할 것 &mdash; &ldquo;당신의 하늘은 여기입니다&rdquo; 순간이 먹히는가.</span>
+        </div>
+      </li>
+      <li>
+        <div>
+          <b>판본 묶기 (유사도 ON) + 성단 이름 투표</b>
+          <span>사용자 제안이 쌓인 뒤에 켠다. 확인할 것 &mdash; 판본이 합쳐지면 겹침이 더 선명해지는가.</span>
+        </div>
+      </li>
+      <li>
+        <div>
+          <b>EDS 편입 (학술논문) · 웹문서 등록</b>
+          <span>여기서 처음으로 외부 자격증명이 필요해진다. 범위를 넓힐 값이 확인된 뒤에 간다.</span>
+        </div>
+      </li>
+    </ol>
+
+    <div class="note">
+      <span class="tag">범위를 좁혀서 얻는 것</span>
+      <p>
+        전 세계를 대상으로 열면 초기 사용자 50명이 각자 다른 자료를 등록해 별이 전부 흩어지고,
+        겹침이라는 핵심 기능이 화면에 아예 나타나지 않는다. 같은 학교면 정반대다 &mdash;
+        같은 수업, 같은 지도교수, 같은 학과. <strong>읽는 자료가 겹칠 확률이 압도적으로 높다.</strong>
+      </p>
+    </div>
+  </section>
+
+  <!-- ══ 8 ══ -->
+  <section>
+    <p class="kicker">다음 할 일</p>
+    <h2>막힌 곳이 없다</h2>
+    <p>
+      범위를 소장자료로 줄이면서 유일한 외부 의존이던 EBSCO 자격증명이 5단계로 밀렸다.
+      1단계를 시작하기 위해 기다려야 할 것은 아무것도 없다. 남은 건 우리가 정하는 일들뿐이다.
+    </p>
+    <ul class="todo">
+      <li>Pyxis <code>all=필드|연산자|값</code> 문법의 필드 코드 전수 확인 (벤더 문서) &mdash;
+          제목·저자 한정 검색에 필요</li>
+      <li>Pyxis 상세 페이지 URL 패턴 확정 &mdash; 인스펙터의 &ldquo;도서관에서 보기&rdquo; 목적지</li>
+      <li>교내 SSO 연동 &mdash; 학번은 salt+hash로만, 소속은 단과대 수준까지만</li>
+      <li>원본 테이블 직접 조회용 계정을 서비스 롤과 분리하고 감사 로그 연결</li>
+      <li>개인정보 처리방침에 <strong>&ldquo;식별 가능한 형태로 저장, 공개 화면에서는 집계로만 표시&rdquo;</strong>로 정확히 기재</li>
+    </ul>
+
+    <div class="note warn">
+      <span class="tag">전산 담당자에게</span>
+      <p>
+        <strong>대출·열람 이력을 자동으로 끌어오지 말 것.</strong> 도서관 이용 기록은 이용자 비밀보호 의무가 걸린 정보다.
+        &ldquo;내 대출 이력에서 별 가져오기&rdquo;는 사용자가 매번 직접 누르는 명시적 가져오기로만 두고,
+        가져온 뒤에도 기본은 비공개여야 한다. 편의를 위해 자동 연동하고 싶은 유혹이 클 텐데,
+        이 서비스에서 유일하게 되돌릴 수 없는 사고가 날 수 있는 지점이다.
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    <span>별자리 서재 · 설계 v0.1</span>
+    <span>schema.sql · screens.md · adapter-library.md</span>
+    <span>실측 2026-09-16</span>
+  </footer>
+
+</div>
