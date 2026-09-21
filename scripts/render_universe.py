@@ -7,8 +7,9 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 sys.stdout.reconfigure(encoding="utf-8")
 # 저장소 루트 — 스크립트 위치에서 유도한다
 PROJECT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA = os.path.join(PROJECT, "public", "universe.json")
-OUT = os.path.join(PROJECT, "public", sys.argv[1] if len(sys.argv) > 1 else "universe.png")
+# python scripts/render_universe.py [입력.json] [출력.png]
+DATA = os.path.join(PROJECT, "public", sys.argv[1] if len(sys.argv) > 1 else "universe.json")
+OUT = os.path.join(PROJECT, "public", sys.argv[2] if len(sys.argv) > 2 else "universe.png")
 
 W, H = 2200, 1500
 SKY = (7, 11, 18)

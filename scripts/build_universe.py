@@ -2,7 +2,13 @@
 """
 전체 유니버스 생성 — 도서관 '내 서재' 실데이터 집계.
 
-  python scripts/build_universe.py [k]      k = 선을 그리는 임계값 (기본 2)
+  python scripts/build_universe.py [k] [minReg] [outName]
+     k       선을 그리는 임계값 — 이 인원 이상이 함께 담은 쌍만 (기본 2)
+     minReg  별이 뜨는 최소 등록자 수 (기본 2)
+     outName 출력 파일명 (기본 universe.json)
+
+  공개용은 둘 다 3 으로 둔다 — 모든 별과 선이 k=3 익명성을 만족한다.
+     python scripts/build_universe.py 3 3 universe-public.json
 
 단위는 '개인 서재 하나'다. 폴더로 쪼개지 않고, A라는 사람이 담은 자료 전체가 한 단위.
 
@@ -36,12 +42,14 @@ import oracledb
 
 sys.stdout.reconfigure(encoding="utf-8")
 
+EDGE_K = int(sys.argv[1]) if len(sys.argv) > 1 else 2
+MIN_REGISTRANTS = int(sys.argv[2]) if len(sys.argv) > 2 else 2
+OUT_NAME = sys.argv[3] if len(sys.argv) > 3 else "universe.json"
+
 # 저장소 루트 — 스크립트 위치에서 유도한다 (절대경로 하드코딩 금지)
 PROJECT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(PROJECT, "public", "universe.json")
+OUT = os.path.join(PROJECT, "public", OUT_NAME)   # argv[3] 로 바꿀 수 있다
 
-MIN_REGISTRANTS = 2
-EDGE_K = int(sys.argv[1]) if len(sys.argv) > 1 else 2
 SHELF_MAX = 400          # 이보다 큰 서재는 큐레이션 계정에 가깝다 (81명, 상위 0.7%)
 
 # ── 접속 ────────────────────────────────────────────────────────────────
@@ -59,7 +67,7 @@ if not SCHEMA:
 conn = oracledb.connect(user=env["DB_USER"], password=env["DB_PASSWORD"], dsn=env["DB_DSN"])
 cur = conn.cursor()
 cur.arraysize = 10000
-print(f"connected {conn.version} · schema {SCHEMA} · k={EDGE_K}")
+print(f"connected {conn.version} · schema {SCHEMA} · k={EDGE_K} · minReg={MIN_REGISTRANTS} → {OUT_NAME}")
 
 # ── 원자료: (이용자, 자료) 쌍 ───────────────────────────────────────────
 print("내 서재 읽는 중…")
