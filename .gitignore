@@ -16,3 +16,6 @@ next-env.d.ts
 
 # 기관 설정값 등 로컬 전용 메모
 *.local.md
+
+# 내부용 촘촘한 판(k=2). 공개 저장소에는 k=3 판만 싣는다
+public/universe-internal.*
