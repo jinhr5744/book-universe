@@ -83,13 +83,17 @@ export default function Universe() {
   const fitted = useRef(false);
 
   useEffect(() => {
-    fetch('/universe.json')
+    // 기본은 공개판(k=3). 내부용 촘촘한 판은 저장소에 없고 로컬에만 있으므로
+    // ?set=internal 을 붙였을 때만 연다. 발표 시연에서 쓴다.
+    const set = new URLSearchParams(window.location.search).get('set');
+    const file = set === 'internal' ? '/universe-internal.json' : '/universe.json';
+    fetch(file)
       .then((r) => {
         if (!r.ok) throw new Error(String(r.status));
         return r.json();
       })
       .then(setData)
-      .catch(() => setError('universe.json 을 읽지 못했습니다. 집계 스크립트를 먼저 실행하세요.'));
+      .catch(() => setError(file.slice(1) + ' 을 읽지 못했습니다. 집계 스크립트를 먼저 실행하세요.'));
   }, []);
 
   /**
